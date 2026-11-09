@@ -16,6 +16,10 @@ import {
     ArrowOutwardRounded,
     CloseRounded,
     MenuRounded,
+    HomeRounded,
+    PersonRounded,
+    CodeRounded,
+    FolderRounded,
 } from "@mui/icons-material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -24,10 +28,10 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import logo from "../assets/mylogo.png";
 
 const navItems = [
-    { id: "home", label: "Home", href: "/#home" },
-    { id: "about", label: "About", href: "/#about" },
-    { id: "skills", label: "Skills", href: "/#skills" },
-    { id: "projects", label: "Projects", href: "/#projects" },
+    { id: "home", label: "Home", href: "/#home", icon: HomeRounded },
+    { id: "about", label: "About", href: "/#about", icon: PersonRounded },
+    { id: "skills", label: "Skills", href: "/#skills", icon: CodeRounded },
+    { id: "projects", label: "Projects", href: "/#projects", icon: FolderRounded },
     { id: "contact", label: "Contact", href: "/#contact" },
 ];
 
@@ -378,36 +382,84 @@ const Navbar = () => {
             {/* Keeps page content below the fixed navigation */}
             <Toolbar sx={{ minHeight: { xs: 76, md: 88 } }} />
 
-            {/* Mobile full-screen menu */}
+            {/* Mobile bottom sheet */}
             <Drawer
-                anchor="right"
+                anchor="bottom"
                 open={drawerOpen}
                 onClose={closeDrawer}
+                transitionDuration={{ enter: 380, exit: 240 }}
+                ModalProps={{
+                    BackdropProps: {
+                        sx: {
+                            backgroundColor: alpha("#000", 0.55),
+                            backdropFilter: "blur(6px)",
+                        },
+                    },
+                }}
                 PaperProps={{
                     sx: {
-                        width: "100%",
-                        maxWidth: 480,
-                        p: { xs: 3, sm: 4 },
-                        backgroundColor: theme.palette.background.default,
-                        backgroundImage: `radial-gradient(circle at 100% 0%, ${alpha(theme.palette.primary.main, 0.22)}, transparent 45%), radial-gradient(circle at 0% 100%, ${alpha(theme.palette.secondary.main, 0.12)}, transparent 45%)`,
-                        borderLeft: `1px solid ${theme.palette.divider}`,
+                        backgroundColor: "transparent",
+                        backgroundImage: "none",
+                        boxShadow: "none",
+                        overflow: "visible",
                     },
                 }}
             >
-                <Stack sx={{ height: "100%" }}>
+                <Box
+                    component={motion.div}
+                    drag="y"
+                    dragConstraints={{ top: 0, bottom: 0 }}
+                    dragElastic={{ top: 0, bottom: 0.7 }}
+                    onDragEnd={(_, info) => {
+                        if (info.offset.y > 90 || info.velocity.y > 500) closeDrawer();
+                    }}
+                    sx={{
+                        mx: 1,
+                        mb: 1,
+                        p: 2.5,
+                        pt: 1.5,
+                        borderRadius: "28px",
+                        border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
+                        backgroundColor: alpha(theme.palette.background.paper, 0.92),
+                        backdropFilter: "blur(24px) saturate(160%)",
+                        WebkitBackdropFilter: "blur(24px) saturate(160%)",
+                        backgroundImage: `radial-gradient(circle at 100% 0%, ${alpha(
+                            theme.palette.primary.main,
+                            0.2
+                        )}, transparent 50%)`,
+                    }}
+                >
+                    {/* Grab handle */}
+                    <Box
+                        sx={{
+                            width: 42,
+                            height: 4,
+                            borderRadius: 99,
+                            mx: "auto",
+                            mb: 2,
+                            bgcolor: alpha(theme.palette.text.primary, 0.25),
+                        }}
+                    />
+
+                    {/* Header */}
                     <Stack
                         direction="row"
                         alignItems="center"
                         justifyContent="space-between"
+                        sx={{ mb: 2.5 }}
                     >
-                        <Stack direction="row" alignItems="center" spacing={1.4}>
+                        <Stack direction="row" alignItems="center" spacing={1.2}>
                             <Box
                                 component="img"
                                 src={logo}
                                 alt="PraizPilot logo"
-                                sx={{ width: 34, height: 34, objectFit: "contain" }}
+                                sx={{ width: 28, height: 28, objectFit: "contain" }}
                             />
-                            <Typography fontWeight={800} fontSize="1.1rem">
+                            <Typography
+                                fontWeight={800}
+                                fontSize="1rem"
+                                letterSpacing="-0.03em"
+                            >
                                 Praiz
                                 <Box component="span" sx={{ color: "secondary.main" }}>
                                     Pilot
@@ -418,91 +470,120 @@ const Navbar = () => {
                         <IconButton
                             onClick={closeDrawer}
                             aria-label="Close navigation menu"
-                            sx={{
-                                width: 46,
-                                height: 46,
-                                border: `1px solid ${theme.palette.divider}`,
-                            }}
+                            size="small"
+                            sx={{ border: `1px solid ${theme.palette.divider}` }}
                         >
-                            <CloseRounded />
+                            <CloseRounded fontSize="small" />
                         </IconButton>
                     </Stack>
 
-                    <Stack sx={{ mt: 7 }}>
-                        {navItems.map((item, i) => (
-                            <Box
-                                key={item.id}
-                                component={motion.div}
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.6, delay: 0.1 + i * 0.07, ease: EASE }}
-                            >
-                                <Box
-                                    component={RouterLink}
-                                    to={item.href}
-                                    onClick={(e) => scrollToSection(e, item.href)}
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "baseline",
-                                        gap: 2.5,
-                                        py: 2.2,
-                                        borderBottom: `1px solid ${theme.palette.divider}`,
-                                        color:
-                                            activeId === item.id
-                                                ? theme.palette.text.primary
-                                                : theme.palette.text.secondary,
-                                        transition: "all .3s ease",
-                                        "&:hover": {
-                                            color: theme.palette.text.primary,
-                                            pl: 1.5,
-                                        },
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            fontFamily: "monospace",
-                                            fontSize: "0.8rem",
-                                            color: "secondary.main",
-                                        }}
-                                    >
-                                        0{i + 1}
-                                    </Typography>
-                                    <Typography
-                                        sx={{
-                                            fontSize: "2.1rem",
-                                            fontWeight: 800,
-                                            letterSpacing: "-0.04em",
-                                            lineHeight: 1.1,
-                                        }}
-                                    >
-                                        {item.label}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        ))}
-                    </Stack>
-
-                    <Box sx={{ flex: 1 }} />
-
+                    {/* Tiles */}
                     <Box
-                        component={motion.div}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.55, ease: EASE }}
                         sx={{
-                            mt: 5,
-                            p: 3,
-                            borderRadius: 5,
-                            border: `1px solid ${alpha(theme.palette.primary.main, 0.28)}`,
-                            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.14)}, ${alpha(theme.palette.secondary.main, 0.06)})`,
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: 1.2,
                         }}
                     >
-                        <Typography fontWeight={700} sx={{ mb: 0.8, fontSize: "1.05rem" }}>
-                            Have a project in mind?
-                        </Typography>
-                        <Typography color="text.secondary" variant="body2" sx={{ mb: 2.5 }}>
-                            Let's turn your idea into something meaningful.
-                        </Typography>
+                        {navItems
+                            .filter((item) => item.id !== "contact")
+                            .map((item, i) => {
+                                const Icon = item.icon;
+                                const isActive = activeId === item.id;
+
+                                return (
+                                    <Box
+                                        key={item.id}
+                                        component={motion.div}
+                                        initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 420,
+                                            damping: 28,
+                                            delay: 0.08 + i * 0.05,
+                                        }}
+                                        whileTap={{ scale: 0.94 }}
+                                    >
+                                        <Box
+                                            component={RouterLink}
+                                            to={item.href}
+                                            onClick={(e) => scrollToSection(e, item.href)}
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: 1.6,
+                                                p: 1.8,
+                                                borderRadius: "20px",
+                                                color: isActive ? "#fff" : "text.primary",
+                                                border: `1px solid ${alpha(
+                                                    isActive
+                                                        ? theme.palette.primary.main
+                                                        : theme.palette.text.primary,
+                                                    isActive ? 0.6 : 0.1
+                                                )}`,
+                                                background: isActive
+                                                    ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+                                                    : alpha(theme.palette.text.primary, 0.04),
+                                                boxShadow: isActive
+                                                    ? `0 10px 28px ${alpha(
+                                                        theme.palette.primary.main,
+                                                        0.4
+                                                    )}`
+                                                    : "none",
+                                                transition: "all .25s ease",
+                                            }}
+                                        >
+                                            <Stack
+                                                direction="row"
+                                                justifyContent="space-between"
+                                                alignItems="center"
+                                            >
+                                                <Icon
+                                                    sx={{
+                                                        fontSize: 22,
+                                                        opacity: isActive ? 1 : 0.8,
+                                                    }}
+                                                />
+                                                <Typography
+                                                    sx={{
+                                                        fontFamily: "monospace",
+                                                        fontSize: "0.68rem",
+                                                        opacity: 0.6,
+                                                    }}
+                                                >
+                                                    0{i + 1}
+                                                </Typography>
+                                            </Stack>
+                                            <Typography
+                                                sx={{
+                                                    fontSize: "1rem",
+                                                    fontWeight: 700,
+                                                    letterSpacing: "-0.02em",
+                                                }}
+                                            >
+                                                {item.label}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                );
+                            })}
+                    </Box>
+
+                    {/* Contact CTA */}
+                    <Box
+                        component={motion.div}
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 420,
+                            damping: 28,
+                            delay: 0.32,
+                        }}
+                        whileTap={{ scale: 0.97 }}
+                        sx={{ mt: 1.4 }}
+                    >
                         <Box
                             component={RouterLink}
                             to="/#contact"
@@ -511,20 +592,25 @@ const Navbar = () => {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-between",
-                                pl: 3,
-                                pr: 0.8,
-                                py: 0.8,
+                                pl: 2.8,
+                                pr: 0.7,
+                                py: 0.7,
                                 borderRadius: 99,
                                 fontWeight: 700,
+                                fontSize: "0.95rem",
                                 color: "#fff",
                                 background: `linear-gradient(110deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                                boxShadow: `0 10px 28px ${alpha(
+                                    theme.palette.primary.main,
+                                    0.4
+                                )}`,
                             }}
                         >
-                            Start a Conversation
+                            Let's Talk
                             <Box
                                 sx={{
-                                    width: 42,
-                                    height: 42,
+                                    width: 38,
+                                    height: 38,
                                     borderRadius: "50%",
                                     bgcolor: "#fff",
                                     color: theme.palette.primary.dark,
@@ -532,19 +618,25 @@ const Navbar = () => {
                                     placeItems: "center",
                                 }}
                             >
-                                <ArrowOutwardRounded />
+                                <ArrowOutwardRounded sx={{ fontSize: 20 }} />
                             </Box>
                         </Box>
-
-                        <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ display: "block", mt: 2.5, letterSpacing: "0.12em" }}
-                        >
-                            BASED IN ABUJA, NIGERIA
-                        </Typography>
                     </Box>
-                </Stack>
+
+                    <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                            display: "block",
+                            textAlign: "center",
+                            mt: 2,
+                            fontSize: "0.62rem",
+                            letterSpacing: "0.16em",
+                        }}
+                    >
+                        BASED IN ABUJA, NIGERIA
+                    </Typography>
+                </Box>
             </Drawer>
         </>
     );
